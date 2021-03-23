@@ -114,3 +114,4 @@ spec:
     host: garouter.d6c9019.kyma-stage.shoot.live.k8s-hana.ondemand.com
     name: garouter
     port: 5000
+#
