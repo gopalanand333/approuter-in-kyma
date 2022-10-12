@@ -1,41 +1,17 @@
-apiVersion: servicecatalog.k8s.io/v1beta1
-kind: ServiceInstance
-metadata:
-  name: garouter-uaa
-  namespace: gopal
-spec:
-  clusterServiceClassExternalName: xsuaa
-  clusterServicePlanExternalName: application
-  parameters:
-    xsappname: garouter
-    tenant-mode: dedicated
-    oauth2-configuration:
-      redirect-uris:
-        - "https://garouter.d6c9019.kyma-stage.shoot.live.k8s-hana.ondemand.com/login/callback"
-    scopes:
-      - name: "$XSAPPNAME.admin"
-        description: Admin
-    role-templates:
-      - name: admin
-        description: Admin
-        scope-references:
-          - "$XSAPPNAME.admin"
----
 
-apiVersion: servicecatalog.k8s.io/v1beta1
+
+apiVersion: services.cloud.sap.com/v1alpha1
 kind: ServiceBinding
 metadata:
   name: routerauth-binding
-  namespace: gopal
 spec:
-  instanceRef:
-    name: garouter-uaa
+  serviceInstanceName: garouter-uaa
   secretName: routerauth-binding
+  externalName: garouter-uaa
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: gopal
   name: garouter
   labels:
     app: garouter
@@ -48,22 +24,21 @@ spec:
       version: v1
   template:
     metadata:
-      namespace: gopal
       labels:
         app: garouter
         version: v1
     spec:
       containers:
         - name: garouter
-          image: gopalanand/garouter:latest
+          image: gopalanand/approuterinkyma:latest
           imagePullPolicy: Always
           resources:
-            limits:
-              memory: 512Mi
-              cpu: "1"
-            requests:
-              memory: 256Mi
-              cpu: "0.2"
+              limits:
+                cpu: "250m"
+                memory: "128Mi"
+              requests:
+                cpu: "250m"
+                memory: "128Mi"
           ports:
             - containerPort: 5000
           volumeMounts:
@@ -78,7 +53,6 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: gopal
   name: garouter
   labels:
     app: garouter
@@ -91,13 +65,16 @@ spec:
     app: garouter
 
 ---
-apiVersion: gateway.kyma-project.io/v1alpha1
+apiVersion: gateway.kyma-project.io/v1beta1
 kind: APIRule
 metadata:
   name: garouter
-  namespace: gopal
 spec:
   gateway: kyma-gateway.kyma-system.svc.cluster.local
+  host: garouter.<your cluster host>
+  service:
+    name: garouter
+    port: 5000
   rules:
     - accessStrategies:
         - config: {}
@@ -110,8 +87,4 @@ spec:
         - DELETE
         - HEAD
       path: /.*
-  service:
-    host: garouter.d6c9019.kyma-stage.shoot.live.k8s-hana.ondemand.com
-    name: garouter
-    port: 5000
-#
+  

@@ -1,10 +1,10 @@
-FROM node:10-slim
-
-# Execute docker build from top-level project directory
-
+FROM node:lts-alpine
+ENV NODE_ENV=production
 WORKDIR /usr/src/app
-COPY . .
+COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]
 RUN npm install
-
+COPY . .
 EXPOSE 5000
-CMD [ "npm", "start" ]
+RUN chown -R node /usr/src/app
+USER node
+CMD ["npm", "start"]

@@ -1,0 +1,28 @@
+apiVersion: services.cloud.sap.com/v1alpha1
+kind: ServiceInstance
+metadata:
+  name: garouter-uaa
+  namespace: <your namespace>
+spec:
+  serviceOfferingName: xsuaa
+  servicePlanName: application
+  externalName: garouter-uaa
+  parameters:
+    xsappname: <id>-garouter
+    tenant-mode: dedicated
+    oauth2-configuration:
+      redirect-uris:
+        - "https://<cluster domain>/login/callback"
+    scopes:
+      - name: "$XSAPPNAME.admin"
+        description: Admin
+    role-templates:
+      - name: admin
+        description: Admin
+        scope-references:
+          - "$XSAPPNAME.admin"
+    role-collections:
+      - name: Approuterkyma
+        description: kyma approuter role
+        role-template-references:
+          - "$XSAPPNAME.admin"

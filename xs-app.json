@@ -3,9 +3,17 @@
     "authenticationMethod": "route",
     "routes": [
         {
+            "source": "^/user-api(.*)",
+            "target": "$1",
+            "service": "sap-approuter-userapi",
+            "authenticationType": "xsuaa",
+            "scope": "$XSAPPNAME.Admin"
+        },
+        {
             "source": "^/(.*)",
             "authenticationType": "xsuaa",
             "localDir": "resources"
         }
+  
     ]
 }
